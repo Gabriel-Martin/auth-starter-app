@@ -6,7 +6,7 @@
 
 // config - setting for how the request is handled after it's recieved.
 
-// auth.mode - if set to optional, the route
+// config.auth.mode - if set to "optional", the route
 // will be accessible without any authentication header
 
 // handler - the function that will run when a request is recieved to the endpoint
@@ -18,6 +18,9 @@ module.exports = {
   method: "POST",
   path: "/api/users",
   config: {
+    auth: {
+      mode: "optional"
+    },
     handler: function(request, reply) {
       // creating a new instance of a user from the User db model
       // will validate any data passed in by comparing to the modelSchema
@@ -25,7 +28,12 @@ module.exports = {
 
       user
         .save() // saves the new user record to the database
-        .then(user => reply(user)) // sends the saved user record in the HTTP response
+        .then(user => {
+          // sends the saved user record in the HTTP response
+          // removes password before returning response
+          delete user.password;
+          reply(user);
+        })
         .catch(err => reply(err)); // sends the error if one occurred in the HTTP response
     }
   }
